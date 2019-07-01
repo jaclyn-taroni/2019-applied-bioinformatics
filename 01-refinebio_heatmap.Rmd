@@ -1,0 +1,167 @@
+---
+title: "Making a heatmap with annotation bars using refine.bio data"
+output: html_notebook
+date: July 2019
+---
+
+## Setup
+
+```{r}
+library(ComplexHeatmap)
+library(dplyr)
+```
+
+## Read in data
+
+### Gene expression matrix
+
+```{r}
+expression_df <- read.delim(file.path("refinebio-data", "GSE39842", 
+                                      "GSE39842.tsv"),
+                            stringsAsFactors = FALSE)
+head(expression_df)
+```
+
+```{r}
+expression_matrix <- as.matrix(expression_df[, -1])
+rownames(expression_matrix) <- expression_df$Gene
+```
+
+Use apply to calculate the variance of the values in each row.
+We'll limit our heatmap to the genese with the highest variance (top 10%).
+
+```{r}
+row_variances <- apply(expression_matrix, 1, var)
+summary(row_variances)
+```
+
+```{r}
+# top 10% of genes in terms of variances
+high_variance_genes <- which(row_variances > quantile(row_variances, 0.9))
+```
+
+```{r}
+# we use the indices of the high variance genes to select them from the
+# expression matrix
+high_variance_matrix <- expression_matrix[high_variance_genes, ]
+```
+
+### Metadata
+
+```{r}
+metadata_df <- read.delim(file.path("refinebio-data", "GSE39842", 
+                                    "metadata_GSE39842.tsv"),
+                          stringsAsFactors = FALSE)
+colnames(metadata_df)
+```
+
+```{r}
+View(metadata_df)
+```
+
+```{r}
+metadata_df <- metadata_df[, c("refinebio_accession_code", 
+                               "genotype",
+                               "refinebio_treatment")]
+```
+
+Reorder the columns of the expression matrix containing only the genes with
+the highest variance
+
+```{r}
+# using sort here will insure that the sample identifiers (colnames) are in
+# ascending order
+high_variance_matrix <- high_variance_matrix[, sort(colnames(high_variance_matrix))]
+```
+
+Reorder the metadata
+
+```{r}
+# sort the data.frame such that the accession codes are in ascending order 
+# using the arrange function from the dplyr package
+metadata_df <- arrange(metadata_df, refinebio_accession_code)
+metadata_df
+```
+
+Check that the order of the samples is the same in the metadata and the
+expression matrix.
+
+```{r}
+all.equal(metadata_df$refinebio_accession_code, colnames(high_variance_matrix))
+```
+
+## Make the heatmap
+
+We'll use only the high variance genes.
+
+### Annotation bars
+
+First, let's get the annotation bars set up.
+`metadata_df` contains the information we need to annotate samples (columns)
+with. 
+Specifically, it contains the genotype and amputation status information.
+
+```{r}
+column_annotation <- HeatmapAnnotation(
+  df = metadata_df[, -1],
+  # note that the values here match the values of what is in the column
+  col = list(genotype = c("Tg(cmlc2a:Ert2-Cre-Ert2/cmlc2a:LnL:GFP)(cmlc2a:LrL:dnHIF1a)" = "#00BFFF", 
+                          "wildtype" = "#FFD700"),
+             refinebio_treatment = c("none" = "#FF7F00",
+                                     "amputation" = "#4EEE94"))
+)
+```
+
+### Heatmap
+
+```{r}
+Heatmap(high_variance_matrix, 
+        show_row_names = FALSE,
+        name = "expression value",
+        top_annotation = column_annotation)
+```
+
+By cleaning the metadata a bit, we can make this easier to read. 
+
+```{r}
+# mutate will change the genotype column in metadata_df to be easier to read
+# recode allows us to change the value of this column
+# these are both from the dplyr library
+cleaned_metadata_df <- mutate(
+  metadata_df,
+  genotype = recode(
+    genotype,
+    "Tg(cmlc2a:Ert2-Cre-Ert2/cmlc2a:LnL:GFP)(cmlc2a:LrL:dnHIF1a)" = "dnHIF1a-expressing"
+  ))
+```
+
+We can also change the column names of `cleaned_metadata_df` to control the
+annotation bar labels.
+
+```{r}
+# we can rename the 'refinebio_treatment' column to simply 'treatment'
+cleaned_metadata_df <- rename(cleaned_metadata_df, 
+                              treatment = refinebio_treatment)
+```
+
+Remake the column annotation object with the cleaned metadata.
+
+```{r}
+column_annotation <- HeatmapAnnotation(
+  df = cleaned_metadata_df[, -1],
+  # note that the values here match the values of what is in the column
+  col = list(genotype = c("dnHIF1a-expressing" = "#00BFFF", 
+                         "wildtype" = "#FFD700"),
+             treatment = c("none" = "#FF7F00",
+                           "amputation" = "#4EEE94"))
+)
+```
+
+Now we're ready to remake the heatmap!
+
+```{r}
+Heatmap(high_variance_matrix, 
+        show_row_names = FALSE,
+        name = "expression value",
+        top_annotation = column_annotation)
+```
