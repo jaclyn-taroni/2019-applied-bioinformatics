@@ -41,3 +41,5 @@ rsconnect/
 # Data from refine.bio
 refinebio-data
 
+# Ignore large PLIER model from the NCI60 cell line data
+models/NCI60_PLIER_model.RDS
