@@ -4,6 +4,9 @@ output: html_notebook
 date: July 2019
 ---
 
+_This notebook is derived from the Alex's Lemonade Stand Foundation 
+[Childhood Cancer Data Lab](https://www.ccdatalab.org/) example workflows._
+
 ## Setup
 
 ```{r}
