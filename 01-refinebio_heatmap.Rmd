@@ -165,3 +165,9 @@ Heatmap(high_variance_matrix,
         name = "expression value",
         top_annotation = column_annotation)
 ```
+
+## Session Info
+
+```{r}
+sessionInfo()
+```
