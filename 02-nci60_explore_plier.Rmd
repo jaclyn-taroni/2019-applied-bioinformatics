@@ -1,0 +1,204 @@
+---
+title: "Exploring drug exposure in the NCI-60 cell lines with PLIER"
+output: html_notebook
+date: July 2019
+---
+
+_This notebook is derived from the Alex's Lemonade Stand Foundation 
+[Childhood Cancer Data Lab](https://www.ccdatalab.org/) training workshop 
+materials._
+
+## Introduction to the data
+
+In this exercise, we'll work with data from GEO accession [`GSE116436`](https://www.refine.bio/experiments/GSE116436/drug-induced-change-in-gene-expression-across-nci-60-cell-lines-after-exposure-to-15-anticancer-agents-for-2-6-and-24h)
+that was processed with refine.bio. 
+
+Here's an excerpt of the description from the authors ([Monks et al. _Cancer Res._ 2018.](https://doi.org/10.1158/0008-5472.CAN-18-0989)):
+
+> To identify patterns of drug-induced gene modulation that occur across different cell types, we measured gene expression changes across NCI-60 cell lines after exposure to 15 anticancer agents.
+
+**We've supplied the following to you:**
+
+* A PLIER model that was trained on the expression data from this experiment (`models/NCI60_PLIER_model.RDS`) (PLIER publication: [Mao et al. _bioRxiv._ 2017.](https://doi.org/10.1101/116061))
+* The sample metadata (`data/GSE116436/metadata_GSE116436_cleaned.tsv`)
+
+We've trained the PLIER model already in the interest of time, but more
+information about training a PLIER model yourself can be found [here](https://github.com/jaclyn-taroni/2019-applied-bioinformatics/blob/master/README.md#running-plier-yourself).
+
+## Setup
+
+We'll use the `dplyr`, `ggplot2`, and `colorblindr` libraries.
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(colorblindr)
+```
+
+If you're interested in more information about plotting with `ggplot2`, check 
+out:
+
+* [`ggplot2` documentation](https://ggplot2.tidyverse.org/)
+* [UC Business Analytics R Programming Guide _An Introduction to `ggplot2`_](https://uc-r.github.io/ggplot_intro)
+* [r.statistics.co _The Complete `ggplot2` Tutorial - Part1_](http://r-statistics.co/Complete-Ggplot2-Tutorial-Part1-With-R-Code.html)
+* [Harvard University Data Science Services _R graphics with `ggplot2` workshop notes_](https://tutorials.iq.harvard.edu/R/Rgraphics/Rgraphics.html)
+
+## Read in data
+
+### Sample metadata
+
+Read in the sample metadata, which is stored as a TSV file.
+
+```{r}
+metadata_df <- read.delim(file.path("data", "GSE116436", 
+                                    "metadata_GSE116436_cleaned.tsv"),
+                          stringsAsFactors = FALSE)
+head(metadata_df)
+```
+
+We can see we have sample identifiers and information about what cell line the
+samples came from and how they were treated.
+
+### Read in and explore the PLIER model
+
+```{r}
+plier_results <- readRDS(file.path("models", "NCI60_PLIER_model.RDS"))
+```
+
+`PLIER` returns a large list with 14 elements.
+We'll take a look at some of the elements.
+
+The `Z` matrix contains the loadings for each latent variable.
+
+```{r}
+dim(plier_results$Z)
+```
+
+The `B` matrix contains the latent variable expression values for each sample.
+
+```{r}
+dim(plier_results$B)
+```
+
+The `U` matrix contains information about the relationships between the input
+pathway and the latent variables.
+
+```{r}
+dim(plier_results$U)
+```
+
+The `summary` data.frame contains statistics about the relationships between
+input pathways and the latent variables.
+
+```{r}
+head(plier_results$summary)
+```
+
+The latent variables from this model will be associated with a pathway if the
+gene expression data supports that there is some shared variation in the 
+expression levels of genes in that pathway.
+It could be due to treatment with a drug or variation could arise from tissue- 
+or cell line-specific differences.
+
+## Is there a latent variable associated with the proteasome pathway?
+
+We'll use the `FDR` column to filter out non-significant associations and the
+`pathway` column to find pathways associated with the term "proteasome."
+
+```{r}
+# filter is a dplyr function used to select *rows* that match certain 
+# criteria
+filter(plier_results$summary, FDR < 0.05,  # significant associations only
+       # grepl returns TRUE when the pattern "proteasome" is found
+       # in the pathway column
+       grepl("proteasome", pathway, ignore.case = TRUE))
+```
+
+The `LV index` refers to the number of the latent variable that is significantly
+associated with this pathway.
+This corresponds to a row in the `B` matrix.
+
+```{r}
+rownames(plier_results$B)[38]
+```
+
+We can look at the `Z` matrix to see what genes contribute most to this latent
+variable, like so:
+
+```{r}
+head(sort(plier_results$Z[, 38], decreasing = TRUE), 10)
+```
+
+These genes are definitely all related to the proteasome!
+
+We can make a data.frame that holds only the expression values for this
+latent variable.
+
+```{r}
+proteasome_lv_df <- data.frame(geo_accession = colnames(plier_results$B),
+                               proteasome_lv = plier_results$B[38, ])
+```
+
+We can use `dplyr` to _join_ the LV38 expression values with the metadata to
+facilitate plotting.
+
+```{r}
+proteasome_df <- inner_join(x = proteasome_lv_df,  # expression values
+                            y = metadata_df,  # sample metadata
+                            by = "geo_accession")  # use the sample id to join
+head(proteasome_df)
+```
+
+Now the data.frame `proteasome_df` has the sample labels _and_ the expression
+values for the proteasome-associated latent variables.
+
+We can sort `proteasome_df` to get an idea of what samples have the highest
+expression values for this latent variable.
+We'll use `arrange` from the `dplyr` library to do this.
+The inclusion of the `desc` function means it will be in descending order.
+
+```{r}
+arrange(proteasome_df, desc(proteasome_lv))
+```
+
+All of the top values come from samples treated with [bortezomib](https://www.drugbank.ca/drugs/DB00188)!
+
+### Line graph time!
+
+We have time point information, so let's make a line graph to examine the
+expression values of proteasome-associated latent variable.
+
+To simplify things, we'll look at only samples from lung.
+We can use `filter` from `dplyr` again to get a data.frame of samples that
+match these criteria.
+
+```{r}
+lung_bortezomib_df <- filter(proteasome_df,
+                             treatment == "bortezomib",
+                             tissue == "Lung")
+```
+
+Let's make a plot of the data included in `lung_bortezomib_df` using `ggplot2`.
+
+```{r}
+# this is the main way we pass data to ggplot2 and tell it what values to
+# plot on which axis, etc.
+ggplot(lung_bortezomib_df, 
+       aes(x = time_hours,  # plot the time point on the x-axis
+           y = proteasome_lv,  # plot the LV expression values on y-axis
+           color = cell_line,  # color by individual cell line
+           # we need to use group to make our line plot
+           group = cell_line)) +  # the + operator allows us add layers
+  geom_point() +  # we'll have points on our graph
+  geom_line() +  # that are connected by a line
+  facet_wrap(~ dose_nM) +  # use facets to separate dosages
+  scale_color_OkabeIto()  # use this scale from colorblindr for accessibility
+```
+
+What do you think is happening in these samples?
+
+## Session Info
+
+```{r}
+sessionInfo()
+```
