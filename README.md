@@ -14,7 +14,7 @@ refine.bio and advanced machine learning topics material for MDIBL Applied Bioin
 
 In the interest of time, we supply a PLIER model that has been trained on [`GSE116436`](https://www.refine.bio/experiments/GSE116436/drug-induced-change-in-gene-expression-across-nci-60-cell-lines-after-exposure-to-15-anticancer-agents-for-2-6-and-24h).
 
-If you want to run PLIER yourself (using the version we did), you install it using the [`devtools`](https://cran.r-project.org/web/packages/devtools/index.html) package with the following command:
+If you want to run PLIER yourself (using the version we did), you can install it using the [`devtools`](https://cran.r-project.org/web/packages/devtools/index.html) package with the following command:
 
 ```R
 devtools::install_github('wgmao/PLIER', 
