@@ -9,6 +9,21 @@ _This notebook is derived from the Alex's Lemonade Stand Foundation
 
 ## Setup
 
+Install required packages if they are not already installed.
+
+```{r}
+# if ComplexHeatmap is NOT in the list of installed packages, install it
+if (!("ComplexHeatmap" %in% installed.packages())) {
+  BiocManager::install("ComplexHeatmap", update = FALSE)
+}
+
+if (!("dplyr" %in% installed.packages())) {
+  install.packages("dplyr")
+}
+```
+
+Load packages.
+
 ```{r}
 library(ComplexHeatmap)
 library(dplyr)
