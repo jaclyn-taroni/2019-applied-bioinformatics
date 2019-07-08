@@ -1,6 +1,6 @@
 # MDIBL Applied Bioinformatics 2019
 
-refine.bio and advanced machine learning topics material for MDIBL Applied Bioinformatics 2019
+[refine.bio](https://www.refine.bio/) and advanced machine learning topics material for [MDIBL Applied Bioinformatics 2019](https://mdibl.org/course/applied-bioinformatics-2019/)
 
 ### R package requirements
 
@@ -10,9 +10,16 @@ refine.bio and advanced machine learning topics material for MDIBL Applied Bioin
 * [`dplyr`](https://dplyr.tidyverse.org/#installation)
 * [`colorblindr`](https://github.com/clauswilke/colorblindr#installation) (requires `cowplot` and `colorspace`)
 
+Notebooks will check if these packages are installed and if not, install them.
+
+### Notebooks
+
+1. [Making a heatmap of refine.bio data using `ComplexHeatmap`](https://jaclyn-taroni.github.io/2019-applied-bioinformatics/01-refinebio_heatmap.nb.html)
+2. [Exploring treatment of NCI-60 cell lines with `PLIER`](https://jaclyn-taroni.github.io/2019-applied-bioinformatics/02-nci60_explore_plier.nb.html)
+
 ### Running PLIER yourself
 
-In the interest of time, we supply a PLIER model that has been trained on [`GSE116436`](https://www.refine.bio/experiments/GSE116436/drug-induced-change-in-gene-expression-across-nci-60-cell-lines-after-exposure-to-15-anticancer-agents-for-2-6-and-24h).
+In the interest of time, we supply a Pathway-Level Information ExtractoR (PLIER) model ([Mao et al. _bioRxiv._ 2017.](https://doi.org/10.1101/116061)) that has been trained on [`GSE116436`](https://www.refine.bio/experiments/GSE116436/drug-induced-change-in-gene-expression-across-nci-60-cell-lines-after-exposure-to-15-anticancer-agents-for-2-6-and-24h).
 
 If you want to run PLIER yourself (using the version we did), you can install it using the [`devtools`](https://cran.r-project.org/web/packages/devtools/index.html) package with the following command:
 
