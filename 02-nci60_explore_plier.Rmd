@@ -55,9 +55,9 @@ install _development versions_ of packages that may have functionality that is
 not yet included in the most recent release.
 
 Another handy function from `devtools` (that is imported from 
-[`remotes`](https://github.com/r-lib/remotes#readme)) is the [`install_version`](https://rdrr.io/cran/remotes/man/install_version.html)
-function that allows us to install a specific package version from CRAN which
-can help with reproducibility.
+[`remotes`](https://github.com/r-lib/remotes#readme)) is [`install_version`](https://rdrr.io/cran/remotes/man/install_version.html), 
+which allows us to install a specific package version from CRAN.
+This can help with reproducibility.
 
 ```{r}
 # we need devtools to install colorblindr
@@ -69,8 +69,8 @@ if (!("devtools" %in% installed.packages())) {
 ### Other packages
 
 ```{r}
-# should have dplyr from last notebook or earlier in the course, but in the 
-# name of good practice...
+# should have dplyr and ggplot2 from last notebook or earlier in the course, 
+# but in the name of good practice...
 if (!("dplyr" %in% installed.packages())) {
   install.packages("dplyr")
 }
