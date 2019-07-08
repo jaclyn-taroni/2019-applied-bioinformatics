@@ -25,6 +25,18 @@ Here's an excerpt of the description from the authors ([Monks et al. _Cancer Res
 We've trained the PLIER model already in the interest of time, but more
 information about training a PLIER model yourself can be found [here](https://github.com/jaclyn-taroni/2019-applied-bioinformatics/blob/master/README.md#running-plier-yourself).
 
+_Note that we performed some data cleaning to include only conditions that we
+deemed to be complete and to make the metadata more usable._
+
+In addition, we'll practice plotting with `ggplot2` some more.
+If you're interested in more information about plotting with `ggplot2`, check 
+out:
+
+* [`ggplot2` documentation](https://ggplot2.tidyverse.org/)
+* [UC Business Analytics R Programming Guide _An Introduction to `ggplot2`_](https://uc-r.github.io/ggplot_intro)
+* [r.statistics.co _The Complete `ggplot2` Tutorial - Part1_](http://r-statistics.co/Complete-Ggplot2-Tutorial-Part1-With-R-Code.html)
+* [Harvard University Data Science Services _R graphics with `ggplot2` workshop notes_](https://tutorials.iq.harvard.edu/R/Rgraphics/Rgraphics.html)
+
 ## Setup
 
 We'll use the `dplyr`, `ggplot2`, and `colorblindr` libraries.
@@ -61,14 +73,6 @@ library(ggplot2)
 library(colorblindr)
 ```
 
-If you're interested in more information about plotting with `ggplot2`, check 
-out:
-
-* [`ggplot2` documentation](https://ggplot2.tidyverse.org/)
-* [UC Business Analytics R Programming Guide _An Introduction to `ggplot2`_](https://uc-r.github.io/ggplot_intro)
-* [r.statistics.co _The Complete `ggplot2` Tutorial - Part1_](http://r-statistics.co/Complete-Ggplot2-Tutorial-Part1-With-R-Code.html)
-* [Harvard University Data Science Services _R graphics with `ggplot2` workshop notes_](https://tutorials.iq.harvard.edu/R/Rgraphics/Rgraphics.html)
-
 ## Read in data
 
 ### Sample metadata
@@ -86,6 +90,12 @@ We can see we have sample identifiers and information about what cell line the
 samples came from and how they were treated.
 
 ### Read in and explore the PLIER model
+
+We saved the PLIER model as an RDS file, which allows us to save a single R
+object from our environment (e.g., when we trained the model ahead of time) and
+load it into a different session (now!).
+(Read more about the benefits of saving single objects in [this post](https://www.fromthebottomoftheheap.net/2012/04/01/saving-and-loading-r-objects/) 
+from Gavin Simpson.)
 
 ```{r}
 plier_results <- readRDS(file.path("models", "NCI60_PLIER_model.RDS"))
