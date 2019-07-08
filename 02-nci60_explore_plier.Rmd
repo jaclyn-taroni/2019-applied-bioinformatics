@@ -28,6 +28,32 @@ information about training a PLIER model yourself can be found [here](https://gi
 ## Setup
 
 We'll use the `dplyr`, `ggplot2`, and `colorblindr` libraries.
+First, we'll check if we need to install them.
+
+```{r}
+# we need devtools to install colorblindr
+if (!("devtools" %in% installed.packages())) {
+  install.packages("devtools")
+}
+
+# should have dplyr from last notebook or earlier in the course, but in the 
+# name of good practice...
+if (!("dplyr" %in% installed.packages())) {
+  install.packages("dplyr")
+}
+
+if (!("ggplot2" %in% installed.packages())) {
+  install.packages("ggplot2")
+}
+
+# colorblindr depends on some things upstream
+if (!("colorblindr" %in% installed.packages())) {
+  # from: https://github.com/clauswilke/colorblindr/tree/1ac3d4d62dad047b68bb66c06cee927a4517d678#installation
+  devtools::install_github("wilkelab/cowplot")
+  install.packages("colorspace", repos = "http://R-Forge.R-project.org")
+  devtools::install_github("clauswilke/colorblindr")
+}
+```
 
 ```{r}
 library(dplyr)
