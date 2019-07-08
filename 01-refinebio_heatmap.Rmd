@@ -7,6 +7,23 @@ date: July 2019
 _This notebook is derived from the Alex's Lemonade Stand Foundation 
 [Childhood Cancer Data Lab](https://www.ccdatalab.org/) example workflows._
 
+## Introduction
+
+In this notebook, we will use [refine.bio](https://www.refine.bio/)-processed 
+data from [`GSE39842`](https://www.refine.bio/experiments/GSE39842/hypoxia-induces-myocardial-regeneration-in-zebrafish) ([Link to GEO Series](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE39842)).
+
+Here is the description from the authors:
+
+> Conditional expression of dominant-negative HIF1a in zebrafish cardiomyocytes severely inhibits heart regeneration. To understand more about the mechanism, we performed microarray analysis of wildtype regenerating zebrafish and dnHIF1a regenerating zebrafish to determine which genes are regulated by hypoxia/HIF1a.
+
+We're going to make a heatmap of high variance genes in this experiment.
+Because we're interested in the _genotype_ (i.e., dnHIF1a-expressing) and 
+the _treatment_ (i.e., amputation/injury), we will add annotation bars to the 
+heatmap torepresent this information.
+The [`ComplexHeatmap` package](https://bioconductor.org/packages/release/bioc/html/ComplexHeatmap.html)
+allows us to do this. 
+The _ComplexHeatmap Complete Reference_ can be found [here](https://jokergoo.github.io/ComplexHeatmap-reference/book/). 
+
 ## Setup
 
 Install required packages if they are not already installed.
